@@ -52,4 +52,8 @@ dependencies {
     //Activity & Navigation
     implementation(libs.activity.compose)
     implementation(libs.navigation.compose)
+
+    //Compose UI
+    implementation(platform(libs.compose.bom))
+    implementation(libs.material3.android)
 }

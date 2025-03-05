@@ -11,13 +11,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.viewinterop.AndroidView
-import com.perihan.newsreaderandroid.AppTopBar
+import androidx.navigation.NavController
+import com.perihan.newsreaderandroid.domain.ArticleDomainModel
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
-fun NewsDetailScreen(viewModel: NewsTopHeadlinesViewModel) {
+fun NewsDetailScreen(navController: NavController) {
+    val article =
+        navController.previousBackStackEntry?.savedStateHandle?.get<ArticleDomainModel>("article")
+
     val context = LocalContext.current
 
     val webView = remember {
@@ -25,11 +28,11 @@ fun NewsDetailScreen(viewModel: NewsTopHeadlinesViewModel) {
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
             webViewClient = WebViewClient()
-            loadUrl(viewModel.selectedUrl ?: "")
+            loadUrl(article?.url ?: "")
         }
     }
 
-    Scaffold(topBar = { AppTopBar(title = stringResource(R.string.news_detail)) }) { innerPadding ->
+    Scaffold { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxWidth()

@@ -18,22 +18,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
-import com.perihan.newsreaderandroid.AppTopBar
 import com.perihan.newsreaderandroid.domain.ArticleDomainModel
 
 @Composable
 fun NewsTopHeadlinesScreen(
-    navController: NavController, viewModel: NewsTopHeadlinesViewModel
+    navController: NavController, viewModel: NewsTopHeadlinesViewModel = hiltViewModel()
 ) {
     val newsItems = viewModel.newsFlow.collectAsLazyPagingItems()
 
-    Scaffold(topBar = { AppTopBar(title = stringResource(R.string.news_reader)) }) { innerPadding ->
+    Scaffold { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -46,6 +47,15 @@ fun NewsTopHeadlinesScreen(
                     .fillMaxWidth()
                     .weight(1f)
             ) {
+                item {
+                    Text(
+                        text = "Top News",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+
                 items(newsItems.itemCount) { index ->
                     newsItems[index]?.let { article ->
                         ArticleItem(
@@ -67,7 +77,7 @@ fun ArticleItem(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         onClick = {
-            viewModel.selectedUrl = article.url
+            navController.currentBackStackEntry?.savedStateHandle?.set("article", article)
             navController.navigate(NewsNavRoute.NewsDetail.route)
         }) {
         Column(modifier = Modifier.padding(16.dp)) {
