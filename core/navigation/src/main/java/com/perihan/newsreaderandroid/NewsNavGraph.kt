@@ -13,11 +13,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.perihan.newsreaderandroid.news.FavoritesScreen
-import com.perihan.newsreaderandroid.news.NewsDetailScreen
+import com.perihan.newsreaderandroid.news.favorites.FavoritesScreen
+import com.perihan.newsreaderandroid.news.newsdetail.NewsDetailScreen
 import com.perihan.newsreaderandroid.news.NewsNavRoute
-import com.perihan.newsreaderandroid.news.NewsTopHeadlinesScreen
-import com.perihan.newsreaderandroid.news.SearchScreen
+import com.perihan.newsreaderandroid.news.topheadlines.NewsTopHeadlinesScreen
+import com.perihan.newsreaderandroid.news.search.SearchScreen
 
 @Composable
 fun NewsNavGraph() {
@@ -29,18 +29,10 @@ fun NewsNavGraph() {
             startDestination = NewsNavRoute.NewsTopHeadlines.route,
             modifier = Modifier.padding(paddingValues)
         ) {
-            composable(NewsNavRoute.NewsTopHeadlines.route) {
-                NewsTopHeadlinesScreen(
-                    navController
-                )
-            }
-            composable(NewsNavRoute.NewsSearch.route) { SearchScreen() }
+            composable(NewsNavRoute.NewsTopHeadlines.route) { NewsTopHeadlinesScreen(navController) }
+            composable(NewsNavRoute.NewsSearch.route) { SearchScreen(navController) }
             composable(NewsNavRoute.NewsFavorites.route) { FavoritesScreen() }
-            composable(
-                NewsNavRoute.NewsDetail.route
-            ) {
-                NewsDetailScreen(navController)
-            }
+            composable(NewsNavRoute.NewsDetail.route) { NewsDetailScreen(navController) }
         }
     }
 }
@@ -54,7 +46,8 @@ fun BottomNavigationBar(navController: NavController) {
     NavigationBar {
         val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
         items.forEach { screen ->
-            NavigationBarItem(icon = { Icon(screen.icon, contentDescription = screen.title) },
+            NavigationBarItem(
+                icon = { Icon(screen.icon, contentDescription = screen.title) },
                 label = { Text(screen.title) },
                 selected = currentRoute == screen.route,
                 onClick = {
@@ -63,7 +56,8 @@ fun BottomNavigationBar(navController: NavController) {
                         launchSingleTop = true
                         restoreState = true
                     }
-                })
+                }
+            )
         }
     }
 }

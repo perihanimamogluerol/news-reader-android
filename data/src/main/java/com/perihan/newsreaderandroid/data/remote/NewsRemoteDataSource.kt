@@ -4,4 +4,5 @@ import com.perihan.newsreaderandroid.data.remote.response.NewsTopHeadlinesRespon
 
 interface NewsRemoteDataSource {
     suspend fun fetchTopHeadlines(page: Int): NewsTopHeadlinesResponse
+    suspend fun searchNews(query: String, page: Int): NewsTopHeadlinesResponse
 }

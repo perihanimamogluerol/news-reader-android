@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.perihan.newsreaderandroid.ui"
+    namespace = "com.perihan.newsreaderandroid.core.ui"
     compileSdk = 35
 
     defaultConfig {

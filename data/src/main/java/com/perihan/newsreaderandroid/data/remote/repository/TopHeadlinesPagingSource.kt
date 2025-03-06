@@ -5,7 +5,7 @@ import androidx.paging.PagingState
 import com.perihan.newsreaderandroid.data.remote.NewsRemoteDataSource
 import com.perihan.newsreaderandroid.data.remote.response.ArticleResponse
 
-class NewsPagingSource(
+class TopHeadlinesPagingSource(
     private val newsRemoteDataSource: NewsRemoteDataSource
 ) : PagingSource<Int, ArticleResponse>() {
     override fun getRefreshKey(state: PagingState<Int, ArticleResponse>): Int? {

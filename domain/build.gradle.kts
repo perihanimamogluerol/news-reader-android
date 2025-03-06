@@ -48,5 +48,6 @@ dependencies {
     //Paging
     implementation(libs.paging.runtime)
 
+    //Serialization
     implementation(libs.kotlinx.serialization.json)
 }

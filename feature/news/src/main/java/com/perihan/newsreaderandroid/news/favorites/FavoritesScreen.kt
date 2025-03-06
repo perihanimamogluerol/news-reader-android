@@ -1,4 +1,4 @@
-package com.perihan.newsreaderandroid.news
+package com.perihan.newsreaderandroid.news.favorites
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize

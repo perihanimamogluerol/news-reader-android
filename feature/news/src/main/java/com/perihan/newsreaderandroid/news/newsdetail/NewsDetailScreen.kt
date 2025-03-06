@@ -1,4 +1,4 @@
-package com.perihan.newsreaderandroid.news
+package com.perihan.newsreaderandroid.news.newsdetail
 
 import android.annotation.SuppressLint
 import android.webkit.WebView
@@ -14,12 +14,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
 import com.perihan.newsreaderandroid.domain.ArticleDomainModel
+import com.perihan.newsreaderandroid.news.NewsNavKeys
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun NewsDetailScreen(navController: NavController) {
     val article =
-        navController.previousBackStackEntry?.savedStateHandle?.get<ArticleDomainModel>("article")
+        navController.previousBackStackEntry?.savedStateHandle?.get<ArticleDomainModel>(NewsNavKeys.ARTICLE)
 
     val context = LocalContext.current
 

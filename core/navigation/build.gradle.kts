@@ -1,23 +1,18 @@
 plugins {
-    alias(libs.plugins.android.application)
+    alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.hilt.android)
-    alias(libs.plugins.ksp)
 }
 
 android {
-    namespace = "com.perihan.newsreaderandroid"
+    namespace = "com.perihan.newsreaderandroid.core.navigation"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.perihan.newsreaderandroid"
         minSdk = 24
-        targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles("consumer-rules.pro")
     }
 
     buildTypes {
@@ -42,18 +37,13 @@ android {
 }
 
 dependencies {
-    implementation(project(":core:navigation"))
-
-    //Hilt
-    implementation(libs.hilt.android)
-    implementation(libs.hilt.navigation.compose)
-    ksp(libs.hilt.compiler)
-
-    //Activity & Navigation
-    implementation(libs.activity.compose)
-    implementation(libs.navigation.compose)
+    implementation(project(":feature:news"))
 
     //Compose UI
     implementation(platform(libs.compose.bom))
     implementation(libs.material3.android)
+
+    //Activity & Navigation
+    implementation(libs.activity.compose)
+    implementation(libs.navigation.compose)
 }

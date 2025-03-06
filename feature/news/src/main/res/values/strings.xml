@@ -1,4 +1,5 @@
 <resources>
-    <string name="news_reader">News Reader</string>
-    <string name="news_detail">News Detail</string>
+    <string name="top_news_title">Top News</string>
+    <string name="error_text">Something went wrong</string>
+    <string name="search_news_placeholder">Search News…</string>
 </resources>

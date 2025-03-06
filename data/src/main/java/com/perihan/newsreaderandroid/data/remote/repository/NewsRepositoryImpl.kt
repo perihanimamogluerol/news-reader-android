@@ -14,6 +14,11 @@ class NewsRepositoryImpl @Inject constructor(private val newsRemoteDataSource: N
     NewsRepository {
     override fun fetchTopHeadlines(): Flow<PagingData<ArticleResponse>> {
         return Pager(config = PagingConfig(pageSize = 20, enablePlaceholders = false),
-            pagingSourceFactory = { NewsPagingSource(newsRemoteDataSource) }).flow
+            pagingSourceFactory = { TopHeadlinesPagingSource(newsRemoteDataSource) }).flow
+    }
+
+    override fun searchNews(query: String): Flow<PagingData<ArticleResponse>> {
+        return Pager(config = PagingConfig(pageSize = 20, enablePlaceholders = false),
+            pagingSourceFactory = { SearchNewsPagingSource(newsRemoteDataSource, query) }).flow
     }
 }
