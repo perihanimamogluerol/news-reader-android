@@ -5,8 +5,7 @@ A modern Android news application that fetches and displays news articles using 
 ## 📸 Screenshots
 
 <div style="display: flex; justify-content: space-around; gap: 20px;">
-  <img src="assets/Screenshot_20250306_124212.png" width="45%" style="border-radius: 10px; margin: 10px;">
-  <img src="assets/Screenshot_20250306_124251.png" width="45%" style="border-radius: 10px; margin: 10px;">
+  <img src="assets/screens.png" width="45%" style="border-radius: 10px; margin: 10px;">
 </div>
 
 ## ✨ Features
