@@ -1,23 +1,27 @@
 # News App 📰
 
-A modern Android news application that fetches and displays news articles using the **News API**. The app follows a **modular architecture** and is built with **Jetpack Compose** for a smooth UI experience.
+A modern Android news application that fetches and displays news articles using the News API. The app follows a modular architecture and is built with Jetpack Compose for a smooth UI experience.
 
 ## 📸 Screenshots
 
-<div style="display: flex; justify-content: space-around; gap: 20px;">
-  <img src="assets/Screenshot_20250306_124212.png" width="45%" style="border-radius: 10px; margin: 10px;">
-  <img src="assets/Screenshot_20250306_124251.png" width="45%" style="border-radius: 10px; margin: 10px;">
+<div style="text-align: center;">
+  <img src="assets/screens.png" style="width: 80%; max-width: 900px; border-radius: 10px; margin: 10px auto; display: block;">
 </div>
 
 ## ✨ Features
-- 📌 Fetch and display the latest news articles  
-- 🔍 View detailed news content  
-- 🏗️ Modular architecture for scalability  
-- 🚀 Built using **Jetpack Compose**  
+- Fetches articles from multiple news sources via the News API
+- Displays trending and latest news dynamically
+- Implements a search functionality with debouncing for efficient keyword-based article retrieval
+- Enables users to save and manage favorite news articles using local storage
+- Allows filtering news based on selected sources using dynamic queries
 
 ## 🛠️ Tech Stack
-- **Language**: Kotlin  
-- **UI**: Jetpack Compose  
-- **Dependency Injection**: Hilt  
-- **Asynchronous Processing**: Coroutines & Flow
-- **Networking**: Retrofit  
+- 💻 Kotlin
+- 🎨 Jetpack Compose
+- 🏗 Hilt
+- 🌐 Retrofit with OkHttp Interceptor
+- 🗄 Room Database
+- ⚡ Coroutines & Flow
+- 🏛 Android App Architecture
+- 📄 Paging 3
+- 🧭 Navigation Component
