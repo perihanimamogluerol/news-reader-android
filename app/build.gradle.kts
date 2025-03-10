@@ -41,19 +41,23 @@ android {
     }
 }
 
+configurations {
+    all {
+        resolutionStrategy {
+            force("org.jetbrains:annotations:23.0.0")
+        }
+    }
+}
+
 dependencies {
-    implementation(project(":core:navigation"))
+    implementation(project(":feature:news"))
 
     //Hilt
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation.compose)
     ksp(libs.hilt.compiler)
 
-    //Activity & Navigation
-    implementation(libs.activity.compose)
-    implementation(libs.navigation.compose)
-
     //Compose UI
     implementation(platform(libs.compose.bom))
-    implementation(libs.material3.android)
+    implementation(libs.material)
 }

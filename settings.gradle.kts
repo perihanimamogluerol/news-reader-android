@@ -21,8 +21,9 @@ dependencyResolutionManagement {
 
 rootProject.name = "news-reader-android"
 include(":app")
+include(":core:common")
+include(":core:navigation")
+include(":core:ui")
 include(":data")
 include(":domain")
 include(":feature:news")
-include(":core:ui")
-include(":core:navigation")

@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import com.perihan.newsreaderandroid.news.NewsNavGraph
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

@@ -1,5 +1,9 @@
 <resources>
+    <string name="app_name">News Reader</string>
     <string name="top_news_title">Top News</string>
     <string name="error_text">Something went wrong</string>
     <string name="search_news_placeholder">Search News…</string>
+    <string name="my_favorites">My Favorites</string>
+    <string name="sources">Sources</string>
+    <string name="news_details">New Details</string>
 </resources>

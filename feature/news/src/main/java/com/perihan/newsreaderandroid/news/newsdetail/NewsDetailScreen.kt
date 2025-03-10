@@ -3,18 +3,21 @@ package com.perihan.newsreaderandroid.news.newsdetail
 import android.annotation.SuppressLint
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
-import com.perihan.newsreaderandroid.domain.ArticleDomainModel
-import com.perihan.newsreaderandroid.news.NewsNavKeys
+import com.perihan.newsreaderandroid.core.navigation.NewsNavKeys
+import com.perihan.newsreaderandroid.core.ui.AppTopBar
+import com.perihan.newsreaderandroid.domain.model.ArticleDomainModel
+import com.perihan.newsreaderandroid.news.R
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
@@ -34,12 +37,18 @@ fun NewsDetailScreen(navController: NavController) {
     }
 
     Scaffold { innerPadding ->
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(innerPadding)
         ) {
-            AndroidView(factory = { webView })
+            item {
+                AppTopBar(title = stringResource(R.string.news_details))
+            }
+
+            item {
+                AndroidView(factory = { webView })
+            }
         }
     }
 }

@@ -37,13 +37,11 @@ android {
 
 dependencies {
     implementation(project(":data"))
+    implementation(project(":core:common"))
 
     //Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
-
-    //Material
-    implementation(libs.material)
 
     //Paging
     implementation(libs.paging.runtime)

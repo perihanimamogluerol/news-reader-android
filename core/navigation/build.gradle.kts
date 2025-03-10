@@ -37,8 +37,6 @@ android {
 }
 
 dependencies {
-    implementation(project(":feature:news"))
-
     //Compose UI
     implementation(platform(libs.compose.bom))
     implementation(libs.material3.android)
