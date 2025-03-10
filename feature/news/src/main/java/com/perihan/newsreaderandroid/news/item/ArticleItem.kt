@@ -28,13 +28,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.perihan.newsreaderandroid.domain.model.ArticleDomainModel
 import com.perihan.newsreaderandroid.core.navigation.NewsNavKeys
 import com.perihan.newsreaderandroid.core.navigation.NewsNavRoute
+import com.perihan.newsreaderandroid.domain.model.ArticleDomainModel
+import com.perihan.newsreaderandroid.news.R
 
 @Composable
 fun ArticleItem(
@@ -59,10 +61,13 @@ fun ArticleItem(
                     model = article.imageUrl,
                     contentScale = ContentScale.Crop,
                     contentDescription = "",
+                    error = painterResource(id = R.drawable.placeholder_image),
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(200.dp)
-                        .clip(RoundedCornerShape(2.dp))
+                        .clip(
+                            RoundedCornerShape(2.dp)
+                        )
                 )
 
                 IconButton(
