@@ -18,23 +18,20 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class NewsTopHeadlinesViewModel
 @Inject constructor(
-    private val fetchTopHeadlinesUseCase: FetchTopHeadlinesUseCase,
+    fetchTopHeadlinesUseCase: FetchTopHeadlinesUseCase,
     private val fetchNewsSourcesUseCase: FetchNewsSourcesUseCase,
     private val insertArticleUseCase: InsertArticleUseCase,
     private val deleteArticleUseCase: DeleteArticleUseCase
 ) : ViewModel() {
 
-    private val _topHeadlinesState =
-        MutableStateFlow<UiState<Flow<PagingData<ArticleDomainModel>>>>(UiState.Loading)
-    val topHeadlinesState: StateFlow<UiState<Flow<PagingData<ArticleDomainModel>>>> =
-        _topHeadlinesState.asStateFlow()
+    val topHeadlinesState: Flow<PagingData<ArticleDomainModel>> =
+        fetchTopHeadlinesUseCase().cachedIn(viewModelScope)
 
     private val _newsSourcesState =
         MutableStateFlow<UiState<List<SourceDomainModel>>>(UiState.Loading)
@@ -43,16 +40,6 @@ class NewsTopHeadlinesViewModel
 
     init {
         fetchNewsSources()
-    }
-
-    fun fetchTopHeadlines() {
-        viewModelScope.launch {
-            fetchTopHeadlinesUseCase().cachedIn(viewModelScope).catch { exception ->
-                _topHeadlinesState.value = UiState.Error(exception.message)
-            }.collectLatest { response ->
-                _topHeadlinesState.value = UiState.Success(flowOf(response))
-            }
-        }
     }
 
     private fun fetchNewsSources() {

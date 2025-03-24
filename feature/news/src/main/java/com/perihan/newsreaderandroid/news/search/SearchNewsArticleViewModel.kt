@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.perihan.newsreaderandroid.core.common.UiState
 import com.perihan.newsreaderandroid.domain.model.ArticleDomainModel
 import com.perihan.newsreaderandroid.domain.usecase.DeleteArticleUseCase
 import com.perihan.newsreaderandroid.domain.usecase.InsertArticleUseCase
@@ -15,13 +14,9 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -37,23 +32,10 @@ class SearchNewsArticleViewModel
     private val _query = MutableStateFlow("news")
     val query: StateFlow<String> = _query
 
-    private val _searchNewsArticleState =
-        MutableStateFlow<UiState<Flow<PagingData<ArticleDomainModel>>>>(UiState.Loading)
-    val searchNewsArticleState: StateFlow<UiState<Flow<PagingData<ArticleDomainModel>>>> =
-        _searchNewsArticleState.asStateFlow()
-
-    fun searchNewsArticle() {
-        viewModelScope.launch {
-            query.debounce(500).distinctUntilChanged().flatMapLatest { query ->
-                searchNewsArticleUseCase(sources = null, query = query).cachedIn(viewModelScope)
-                    .catch { exception ->
-                        _searchNewsArticleState.value = UiState.Error(exception.message)
-                    }
-            }.collectLatest { response ->
-                _searchNewsArticleState.value = UiState.Success(flowOf(response))
-            }
-        }
-    }
+    val searchNewsArticleState: Flow<PagingData<ArticleDomainModel>> =
+        query.debounce(500).distinctUntilChanged().flatMapLatest { searchQuery ->
+            searchNewsArticleUseCase(sources = null, query = searchQuery)
+        }.cachedIn(viewModelScope)
 
     fun setQuery(newQuery: String) {
         _query.value = newQuery
