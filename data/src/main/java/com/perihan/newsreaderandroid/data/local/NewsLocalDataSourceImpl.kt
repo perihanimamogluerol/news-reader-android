@@ -1,10 +1,10 @@
 package com.perihan.newsreaderandroid.data.local
 
 import com.perihan.newsreaderandroid.data.local.entity.ArticleEntity
-import dagger.hilt.android.scopes.ViewModelScoped
 import javax.inject.Inject
+import javax.inject.Singleton
 
-@ViewModelScoped
+@Singleton
 class NewsLocalDataSourceImpl @Inject constructor(private val newsDao: NewsDao) :
     NewsLocalDataSource {
     override suspend fun fetchFavoriteArticles(): List<ArticleEntity> =

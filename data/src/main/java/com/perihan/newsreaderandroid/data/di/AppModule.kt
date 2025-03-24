@@ -9,22 +9,22 @@ import com.perihan.newsreaderandroid.data.repository.NewsRepositoryImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ViewModelComponent
-import dagger.hilt.android.scopes.ViewModelScoped
+import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
 
 @Module
-@InstallIn(ViewModelComponent::class)
+@InstallIn(SingletonComponent::class)
 abstract class AppModule {
 
     @Binds
-    @ViewModelScoped
+    @Singleton
     abstract fun bindNewsRemoteDataSource(remoteDataSource: NewsRemoteDataSourceImpl): NewsRemoteDataSource
 
     @Binds
-    @ViewModelScoped
+    @Singleton
     abstract fun bindNewsRepository(repository: NewsRepositoryImpl): NewsRepository
 
     @Binds
-    @ViewModelScoped
+    @Singleton
     abstract fun bindNewsLocalDataSource(localDataSource: NewsLocalDataSourceImpl): NewsLocalDataSource
 }

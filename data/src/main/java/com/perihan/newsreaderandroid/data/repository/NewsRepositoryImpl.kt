@@ -11,18 +11,16 @@ import com.perihan.newsreaderandroid.data.remote.pagingsource.SearchNewsPagingSo
 import com.perihan.newsreaderandroid.data.remote.pagingsource.TopHeadlinesPagingSource
 import com.perihan.newsreaderandroid.data.remote.response.source.NewsSourcesResponse
 import com.perihan.newsreaderandroid.data.remote.response.topheadline.ArticleResponse
-import dagger.hilt.android.scopes.ViewModelScoped
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
+import javax.inject.Singleton
 
 @OptIn(ExperimentalCoroutinesApi::class)
-@ViewModelScoped
+@Singleton
 class NewsRepositoryImpl @Inject constructor(
     private val newsRemoteDataSource: NewsRemoteDataSource,
     private val newsLocalDataSource: NewsLocalDataSource
@@ -41,7 +39,10 @@ class NewsRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun searchNewsArticle(sources: String?, query: String): Flow<PagingData<ArticleResponse>> {
+    override fun searchNewsArticle(
+        sources: String?,
+        query: String
+    ): Flow<PagingData<ArticleResponse>> {
         return flow {
             emit(newsLocalDataSource.fetchFavoriteArticles().map { it.title })
         }.flatMapLatest { favoriteTitles ->
