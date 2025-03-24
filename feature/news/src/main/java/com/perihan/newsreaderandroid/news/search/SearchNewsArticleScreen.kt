@@ -16,7 +16,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -25,24 +24,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.paging.PagingData
+import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.perihan.newsreaderandroid.core.common.UiState
 import com.perihan.newsreaderandroid.domain.model.ArticleDomainModel
 import com.perihan.newsreaderandroid.news.R
 import com.perihan.newsreaderandroid.news.item.ArticleItem
-import kotlinx.coroutines.flow.Flow
 
 @Composable
 fun SearchNewsArticleScreen(
-    navController: NavController,
-    viewModel: SearchNewsArticleViewModel = hiltViewModel()
+    navController: NavController
 ) {
-    LaunchedEffect(Unit) {
-        viewModel.searchNewsArticle()
-    }
-
     Scaffold { innerPadding ->
         Column(
             modifier = Modifier
@@ -56,8 +48,8 @@ fun SearchNewsArticleScreen(
 
 @Composable
 fun Init(navController: NavController, viewModel: SearchNewsArticleViewModel = hiltViewModel()) {
-    val searchState by viewModel.searchNewsArticleState.collectAsState()
     val query by viewModel.query.collectAsState()
+    val pagingItems = viewModel.searchNewsArticleState.collectAsLazyPagingItems()
 
     TextField(value = query,
         onValueChange = { viewModel.setQuery(it) },
@@ -67,29 +59,28 @@ fun Init(navController: NavController, viewModel: SearchNewsArticleViewModel = h
             .padding(16.dp),
         leadingIcon = { Icon(Icons.Default.Search, contentDescription = "") })
 
-    when (searchState) {
-        is UiState.Loading -> {
+    when (pagingItems.loadState.refresh) {
+        is LoadState.Loading -> {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
         }
 
-        is UiState.Success -> {
-            val response =
-                (searchState as UiState.Success<Flow<PagingData<ArticleDomainModel>>>).data.collectAsLazyPagingItems()
-            SearchNewsArticleContent(response, navController)
-        }
-
-        is UiState.Error -> {
+        is LoadState.Error -> {
+            val error = pagingItems.loadState.refresh as LoadState.Error
             Column(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(text = (searchState as UiState.Error).message.orEmpty().ifBlank {
+                Text(text = error.error.localizedMessage.orEmpty().ifBlank {
                     stringResource(R.string.error_text)
                 })
             }
+        }
+
+        else -> {
+            SearchNewsArticleContent(pagingItems, navController)
         }
     }
 }

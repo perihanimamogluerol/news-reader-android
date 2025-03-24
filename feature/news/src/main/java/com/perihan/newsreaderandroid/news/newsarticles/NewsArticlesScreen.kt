@@ -13,8 +13,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -23,15 +21,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.paging.PagingData
+import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.perihan.newsreaderandroid.core.common.UiState
 import com.perihan.newsreaderandroid.core.navigation.NewsNavKeys
 import com.perihan.newsreaderandroid.domain.model.ArticleDomainModel
 import com.perihan.newsreaderandroid.news.R
 import com.perihan.newsreaderandroid.news.item.ArticleItem
-import kotlinx.coroutines.flow.Flow
 
 @Composable
 fun NewsArticlesScreen(
@@ -41,7 +37,7 @@ fun NewsArticlesScreen(
         navController.previousBackStackEntry?.savedStateHandle?.get<String>(NewsNavKeys.SOURCE_ID)
 
     LaunchedEffect(sourceId) {
-        viewModel.searchNewsArticle(sources = sourceId)
+        viewModel.searchNewsArticle(sourceId)
     }
 
     Scaffold { innerPadding ->
@@ -61,31 +57,30 @@ fun Init(
     sourceId: String?,
     viewModel: NewsArticlesViewModel = hiltViewModel()
 ) {
-    val searchState by viewModel.searchNewsArticleState.collectAsState()
+    val pagingItems = viewModel.searchNewsArticleState.collectAsLazyPagingItems()
 
-    when (searchState) {
-        is UiState.Loading -> {
+    when (pagingItems.loadState.refresh) {
+        is LoadState.Loading -> {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
         }
 
-        is UiState.Success -> {
-            val response =
-                (searchState as UiState.Success<Flow<PagingData<ArticleDomainModel>>>).data.collectAsLazyPagingItems()
-            NewsArticlesContent(sourceId, response, navController)
-        }
-
-        is UiState.Error -> {
+        is LoadState.Error -> {
+            val error = pagingItems.loadState.refresh as LoadState.Error
             Column(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(text = (searchState as UiState.Error).message.orEmpty().ifBlank {
+                Text(text = error.error.localizedMessage.orEmpty().ifBlank {
                     stringResource(R.string.error_text)
                 })
             }
+        }
+
+        else -> {
+            NewsArticlesContent(sourceId, pagingItems, navController)
         }
     }
 }
@@ -112,14 +107,12 @@ fun NewsArticlesContent(
 
         items(response.itemCount) { index ->
             response[index]?.let { article ->
-                ArticleItem(
-                    navController = navController,
+                ArticleItem(navController = navController,
                     article = article,
                     modifier = Modifier.animateItem(fadeInSpec = null, fadeOutSpec = null),
                     { isFavorite ->
                         viewModel.toggleFavorite(article = article, isFavorite = isFavorite)
-                    }
-                )
+                    })
             }
         }
     }

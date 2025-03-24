@@ -11,13 +11,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
 import com.perihan.newsreaderandroid.core.navigation.NewsNavKeys
-import com.perihan.newsreaderandroid.core.ui.AppTopBar
 import com.perihan.newsreaderandroid.domain.model.ArticleDomainModel
-import com.perihan.newsreaderandroid.news.R
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
@@ -42,9 +39,6 @@ fun NewsDetailScreen(navController: NavController) {
                 .fillMaxWidth()
                 .padding(innerPadding)
         ) {
-            item {
-                AppTopBar(title = stringResource(R.string.news_details))
-            }
 
             item {
                 AndroidView(factory = { webView })

@@ -71,9 +71,8 @@ fun Init(navController: NavController, viewModel: FavoriteArticlesViewModel = hi
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(
-                    text = (favoriteArticlesState as UiState.Error).message.orEmpty()
-                        .ifBlank { stringResource(R.string.error_text) })
+                Text(text = (favoriteArticlesState as UiState.Error).message.orEmpty()
+                    .ifBlank { stringResource(R.string.error_text) })
             }
         }
     }
@@ -99,14 +98,12 @@ fun FavoriteArticlesContent(
         }
 
         items(response, key = { it.title }) { article ->
-            ArticleItem(
-                navController = navController,
+            ArticleItem(navController = navController,
                 article = article,
                 modifier = Modifier.animateItem(fadeInSpec = null, fadeOutSpec = null),
                 { isFavorite ->
                     viewModel.toggleFavorite(article = article, isFavorite = isFavorite)
-                }
-            )
+                })
         }
     }
 }
