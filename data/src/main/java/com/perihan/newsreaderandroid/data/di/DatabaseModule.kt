@@ -25,6 +25,7 @@ object DatabaseModule {
     }
 
     @Provides
+    @Singleton
     fun provideNewsDao(database: NewsDatabase): NewsDao {
         return database.newsDao()
     }
