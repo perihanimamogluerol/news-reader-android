@@ -7,8 +7,8 @@ import androidx.paging.map
 import com.perihan.newsreaderandroid.data.local.NewsLocalDataSource
 import com.perihan.newsreaderandroid.data.local.entity.ArticleEntity
 import com.perihan.newsreaderandroid.data.remote.NewsRemoteDataSource
-import com.perihan.newsreaderandroid.data.remote.pagingsource.SearchNewsPagingSource
-import com.perihan.newsreaderandroid.data.remote.pagingsource.TopHeadlinesPagingSource
+import com.perihan.newsreaderandroid.data.remote.pagingsource.SearchNewsPagingSourceFactory
+import com.perihan.newsreaderandroid.data.remote.pagingsource.TopHeadlinesPagingSourceFactory
 import com.perihan.newsreaderandroid.data.remote.response.source.NewsSourcesResponse
 import com.perihan.newsreaderandroid.data.remote.response.topheadline.ArticleResponse
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -23,7 +23,9 @@ import javax.inject.Singleton
 @Singleton
 class NewsRepositoryImpl @Inject constructor(
     private val newsRemoteDataSource: NewsRemoteDataSource,
-    private val newsLocalDataSource: NewsLocalDataSource
+    private val newsLocalDataSource: NewsLocalDataSource,
+    private val topHeadlinesPagingSourceFactory: TopHeadlinesPagingSourceFactory,
+    private val searchNewsPagingSourceFactory: SearchNewsPagingSourceFactory.Factory
 ) : NewsRepository {
 
     override fun fetchTopHeadlines(): Flow<PagingData<ArticleResponse>> {
@@ -31,7 +33,7 @@ class NewsRepositoryImpl @Inject constructor(
             emit(newsLocalDataSource.fetchFavoriteArticles().map { it.title })
         }.flatMapLatest { favoriteTitles ->
             Pager(config = PagingConfig(pageSize = 20, enablePlaceholders = false),
-                pagingSourceFactory = { TopHeadlinesPagingSource(newsRemoteDataSource) }).flow.map { pagingData ->
+                pagingSourceFactory = { topHeadlinesPagingSourceFactory.create() }).flow.map { pagingData ->
                 pagingData.map { article ->
                     article.copy(isFavorite = favoriteTitles.contains(article.title))
                 }
@@ -40,19 +42,14 @@ class NewsRepositoryImpl @Inject constructor(
     }
 
     override fun searchNewsArticle(
-        sources: String?,
-        query: String
+        sources: String?, query: String
     ): Flow<PagingData<ArticleResponse>> {
         return flow {
             emit(newsLocalDataSource.fetchFavoriteArticles().map { it.title })
         }.flatMapLatest { favoriteTitles ->
             Pager(config = PagingConfig(pageSize = 20, enablePlaceholders = false),
                 pagingSourceFactory = {
-                    SearchNewsPagingSource(
-                        sources = sources,
-                        query = query,
-                        newsRemoteDataSource = newsRemoteDataSource
-                    )
+                    searchNewsPagingSourceFactory.create(sources, query).create()
                 }).flow.map { pagingData ->
                 pagingData.map { article ->
                     article.copy(isFavorite = favoriteTitles.contains(article.title))
