@@ -1,4 +1,4 @@
-package com.perihan.newsreaderandroid.data
+package com.perihan.newsreaderandroid.data.utils
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState

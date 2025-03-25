@@ -1,4 +1,4 @@
-package com.perihan.newsreaderandroid.data
+package com.perihan.newsreaderandroid.data.utils
 
 import com.perihan.newsreaderandroid.data.local.entity.ArticleEntity
 import com.perihan.newsreaderandroid.data.remote.response.topheadline.ArticleResponse

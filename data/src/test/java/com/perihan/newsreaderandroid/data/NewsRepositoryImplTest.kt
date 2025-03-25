@@ -8,6 +8,9 @@ import com.perihan.newsreaderandroid.data.remote.pagingsource.SearchNewsPagingSo
 import com.perihan.newsreaderandroid.data.remote.pagingsource.TopHeadlinesPagingSourceFactory
 import com.perihan.newsreaderandroid.data.remote.response.topheadline.ArticleResponse
 import com.perihan.newsreaderandroid.data.repository.NewsRepositoryImpl
+import com.perihan.newsreaderandroid.data.utils.FakePagingSource
+import com.perihan.newsreaderandroid.data.utils.favoriteArticles
+import com.perihan.newsreaderandroid.data.utils.remoteArticles
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -32,7 +35,9 @@ class NewsRepositoryImplTest {
     private val newsLocalDataSource: NewsLocalDataSource = mockk()
     private val newsRemoteDataSource: NewsRemoteDataSource = mockk()
     private val topHeadlinesPagingSourceFactory: TopHeadlinesPagingSourceFactory = mockk()
-    private val searchNewsPagingSourceFactory: SearchNewsPagingSourceFactory.Factory = mockk()
+    private val searchNewsPagingSourceFactory: SearchNewsPagingSourceFactory = mockk()
+    private val searchNewsPagingSourceFactoryProvider: SearchNewsPagingSourceFactory.Factory =
+        mockk()
     private lateinit var repository: NewsRepositoryImpl
 
     private val testDispatcher = StandardTestDispatcher()
@@ -46,7 +51,7 @@ class NewsRepositoryImplTest {
             newsRemoteDataSource,
             newsLocalDataSource,
             topHeadlinesPagingSourceFactory,
-            searchNewsPagingSourceFactory
+            searchNewsPagingSourceFactoryProvider
         )
     }
 
@@ -118,4 +123,46 @@ class NewsRepositoryImplTest {
         assertEquals(1, snapshot.size)
         assertFalse(snapshot[0].isFavorite)
     }
+
+    @Test
+    fun `GIVEN remote search results and local favorites WHEN searching THEN maps isFavorite correctly`() =
+        runTest {
+            val favorites = favoriteArticles("News A", "News B")
+            coEvery { newsLocalDataSource.fetchFavoriteArticles() } returns favorites
+
+            val remoteArticles = remoteArticles("News A", "News C")
+            every { searchNewsPagingSourceFactory.create() } returns FakePagingSource(remoteArticles)
+            every {
+                searchNewsPagingSourceFactoryProvider.create(
+                    null, "android"
+                )
+            } returns searchNewsPagingSourceFactory
+
+            val snapshot = repository.searchNewsArticle(null, "android").asSnapshot()
+
+            assertEquals(2, snapshot.size)
+            assertTrue(snapshot[0].isFavorite)
+            assertFalse(snapshot[1].isFavorite)
+
+            coVerify(exactly = 1) { newsLocalDataSource.fetchFavoriteArticles() }
+        }
+
+    @Test
+    fun `GIVEN local favorites throws exception WHEN searching THEN handles gracefully`() =
+        runTest {
+            coEvery { newsLocalDataSource.fetchFavoriteArticles() } throws RuntimeException("DB Error")
+
+            val remoteArticles = remoteArticles("News A")
+            every { searchNewsPagingSourceFactory.create() } returns FakePagingSource(remoteArticles)
+            every {
+                searchNewsPagingSourceFactoryProvider.create(
+                    null, "android"
+                )
+            } returns searchNewsPagingSourceFactory
+
+            val snapshot = repository.searchNewsArticle(null, "android").asSnapshot()
+
+            assertEquals(1, snapshot.size)
+            assertFalse(snapshot[0].isFavorite)
+        }
 }
