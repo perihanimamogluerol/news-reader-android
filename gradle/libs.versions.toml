@@ -17,6 +17,9 @@ activityCompose = "1.9.0"
 navigationCompose = "2.7.6"
 paging = "3.2.1"
 room = "2.6.1"
+junit = "4.13.2"
+kotlinxCoroutinesTest = "1.7.3"
+mockk = "1.13.8"
 
 [libraries]
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
@@ -40,6 +43,10 @@ paging-compose = { group = "androidx.paging", name = "paging-compose", version.r
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+paging-testing = { module = "androidx.paging:paging-testing", version.ref = "paging" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

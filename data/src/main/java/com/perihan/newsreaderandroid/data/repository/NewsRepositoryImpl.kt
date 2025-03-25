@@ -30,12 +30,17 @@ class NewsRepositoryImpl @Inject constructor(
 
     override fun fetchTopHeadlines(): Flow<PagingData<ArticleResponse>> {
         return flow {
-            emit(newsLocalDataSource.fetchFavoriteArticles().map { it.title })
-        }.flatMapLatest { favoriteTitles ->
+            val favoriteArticleTitles = try {
+                newsLocalDataSource.fetchFavoriteArticles().map { it.title }
+            } catch (e: Exception) {
+                emptyList()
+            }
+            emit(favoriteArticleTitles)
+        }.flatMapLatest { favoriteArticleTitles ->
             Pager(config = PagingConfig(pageSize = 20, enablePlaceholders = false),
                 pagingSourceFactory = { topHeadlinesPagingSourceFactory.create() }).flow.map { pagingData ->
                 pagingData.map { article ->
-                    article.copy(isFavorite = favoriteTitles.contains(article.title))
+                    article.copy(isFavorite = favoriteArticleTitles.contains(article.title))
                 }
             }
         }
@@ -45,14 +50,19 @@ class NewsRepositoryImpl @Inject constructor(
         sources: String?, query: String
     ): Flow<PagingData<ArticleResponse>> {
         return flow {
-            emit(newsLocalDataSource.fetchFavoriteArticles().map { it.title })
-        }.flatMapLatest { favoriteTitles ->
+            val favoriteArticleTitles = try {
+                newsLocalDataSource.fetchFavoriteArticles().map { it.title }
+            } catch (e: Exception) {
+                emptyList()
+            }
+            emit(favoriteArticleTitles)
+        }.flatMapLatest { favoriteArticleTitles ->
             Pager(config = PagingConfig(pageSize = 20, enablePlaceholders = false),
                 pagingSourceFactory = {
                     searchNewsPagingSourceFactory.create(sources, query).create()
                 }).flow.map { pagingData ->
                 pagingData.map { article ->
-                    article.copy(isFavorite = favoriteTitles.contains(article.title))
+                    article.copy(isFavorite = favoriteArticleTitles.contains(article.title))
                 }
             }
         }
