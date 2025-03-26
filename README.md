@@ -25,3 +25,4 @@ A modern Android news application that fetches and displays news articles using 
 - 🏛 Android App Architecture
 - 📄 Paging 3
 - 🧭 Navigation Component
+- 🧪 JUnit, MockK, Coroutines Test, Paging Testing
