@@ -59,4 +59,10 @@ dependencies {
     //Paging
     implementation(libs.paging.runtime)
     implementation(libs.paging.compose)
+
+    //Testing
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.mockk)
+    testImplementation(libs.paging.testing)
 }
