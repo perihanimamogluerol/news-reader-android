@@ -9,15 +9,21 @@ import com.perihan.newsreaderandroid.data.remote.pagingsource.TopHeadlinesPaging
 import com.perihan.newsreaderandroid.data.remote.response.topheadline.ArticleResponse
 import com.perihan.newsreaderandroid.data.repository.NewsRepositoryImpl
 import com.perihan.newsreaderandroid.data.utils.FakePagingSource
+import com.perihan.newsreaderandroid.data.utils.articleEntity
 import com.perihan.newsreaderandroid.data.utils.favoriteArticles
 import com.perihan.newsreaderandroid.data.utils.remoteArticles
+import com.perihan.newsreaderandroid.data.utils.remoteNewsSources
+import com.perihan.newsreaderandroid.data.utils.remoteSources
+import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -165,4 +171,53 @@ class NewsRepositoryImplTest {
             assertEquals(1, snapshot.size)
             assertFalse(snapshot[0].isFavorite)
         }
+
+    @Test
+    fun `WHEN inserting article THEN calls local data source and emits Unit`() = runTest {
+        val article = articleEntity(title = "Test Article")
+
+        coEvery { newsLocalDataSource.insertArticle(article) } just Runs
+
+        val result = repository.insertArticle(article).first()
+
+        coVerify(exactly = 1) { newsLocalDataSource.insertArticle(article) }
+        assertEquals(Unit, result)
+    }
+
+    @Test
+    fun `WHEN deleting article THEN calls local data source and emits Unit`() = runTest {
+        val title = "Sample News"
+
+        coEvery { newsLocalDataSource.deleteArticle(articleTitle = title) } just Runs
+
+        val result = repository.deleteArticle(title).first()
+
+        coVerify(exactly = 1) { newsLocalDataSource.deleteArticle(articleTitle = title) }
+        assertEquals(Unit, result)
+    }
+
+    @Test
+    fun `WHEN fetching favorite articles THEN emits articles from local data source`() = runTest {
+        val favoriteArticles = favoriteArticles("News A")
+        coEvery { newsLocalDataSource.fetchFavoriteArticles() } returns favoriteArticles
+
+        val result = repository.fetchFavoriteArticles().first()
+
+        coVerify(exactly = 1) { newsLocalDataSource.fetchFavoriteArticles() }
+        assertEquals(1, result.size)
+        assertEquals(favoriteArticles[0], result[0])
+    }
+
+    @Test
+    fun `WHEN fetching news sources THEN emits data from remote data source`() = runTest {
+        val sourceList = remoteSources("BBC News")
+        val response = remoteNewsSources(sourceList)
+        coEvery { newsRemoteDataSource.fetchNewsSources() } returns response
+
+        val result = repository.fetchNewsSources().first()
+
+        coVerify(exactly = 1) { newsRemoteDataSource.fetchNewsSources() }
+        assertEquals(1, result.sources?.size)
+        assertEquals(response, result)
+    }
 }
