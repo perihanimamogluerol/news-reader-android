@@ -4,6 +4,8 @@ const CLAUDE_API_KEY = process.env.CLAUDE_API_KEY;
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const REPO = process.env.REPO;
 
+console.log("CLAUDE KEY:", CLAUDE_API_KEY ? "OK" : "MISSING");
+
 if (!GITHUB_TOKEN) {
   throw new Error("GITHUB_TOKEN is missing");
 }
@@ -36,7 +38,6 @@ function getSinceDate(hoursAgo = 24) {
 
 async function getRecentlyMergedPrs() {
   const pulls = await github(`/repos/${REPO}/pulls?state=closed&per_page=100`);
-
   const since = getSinceDate(24);
 
   return pulls.filter((pr) => {
@@ -76,6 +77,17 @@ async function enrichPr(pr) {
   };
 }
 
+function detectChangeType(pr) {
+  const text = `${pr.title}\n${pr.commitMessages.join("\n")}`.toLowerCase();
+
+  if (text.includes("fix")) return "bugfix";
+  if (text.includes("refactor")) return "refactor";
+  if (text.includes("test")) return "test";
+  if (text.includes("feat") || text.includes("feature")) return "feature";
+
+  return "other";
+}
+
 function analyzePr(pr) {
   const layers = new Set();
   const modules = new Set();
@@ -103,25 +115,27 @@ function analyzePr(pr) {
       hasTests = true;
     }
 
-    if (path.startsWith("feature/")) {
-      modules.add(path.split("/")[1] || "unknown");
-    }
-    if (path.startsWith("app/")) {
-      modules.add("app");
-    }
-
-    if (path.includes("navigation")) {
-      hasNavigationChange = true;
-      risk = "medium";
-    }
-
     if (
       path.endsWith("build.gradle") ||
       path.endsWith("build.gradle.kts") ||
       path.includes("gradle/")
     ) {
+      layers.add("Build");
       hasBuildChange = true;
       risk = "high";
+    }
+
+    if (path.includes("navigation")) {
+      hasNavigationChange = true;
+      if (risk !== "high") risk = "medium";
+    }
+
+    if (path.startsWith("feature/")) {
+      modules.add(path.split("/")[1] || "unknown");
+    }
+
+    if (path.startsWith("app/")) {
+      modules.add("app");
     }
   }
 
@@ -138,15 +152,53 @@ function analyzePr(pr) {
   };
 }
 
-function detectChangeType(pr) {
-  const text = `${pr.title}\n${pr.commitMessages.join("\n")}`.toLowerCase();
+async function getClaudeSummary(pr) {
+  if (!CLAUDE_API_KEY) return null;
 
-  if (text.includes("fix")) return "bugfix";
-  if (text.includes("refactor")) return "refactor";
-  if (text.includes("test")) return "test";
-  if (text.includes("feat") || text.includes("feature")) return "feature";
+  const prompt = `
+You are a senior Android engineer.
 
-  return "other";
+Analyze this pull request:
+
+Title: ${pr.title}
+
+Files:
+${pr.files.map((f) => f.filename).join("\n")}
+
+Commit messages:
+${pr.commitMessages.join("\n")}
+
+Explain briefly:
+1. What this PR does
+2. Potential risks
+3. What QA should test
+
+Keep it short and practical.
+`;
+
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "x-api-key": CLAUDE_API_KEY,
+      "anthropic-version": "2023-06-01",
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 300,
+      messages: [
+        {
+          role: "user",
+          content: prompt
+        }
+      ]
+    })
+  });
+
+  const data = await response.json();
+  console.log("Claude response:", JSON.stringify(data));
+
+  return data?.content?.[0]?.text || null;
 }
 
 function buildMarkdown(prs) {
@@ -172,8 +224,8 @@ function buildMarkdown(prs) {
     md += `- Navigation change: ${pr.analysis.hasNavigationChange ? "Yes" : "No"}\n`;
 
     if (pr.aiSummary) {
-  md += `\n🤖 AI Summary:\n${pr.aiSummary}\n`;
-}
+      md += `\n🤖 AI Summary:\n${pr.aiSummary}\n`;
+    }
 
     if (pr.labels.length > 0) {
       md += `- Labels: ${pr.labels.join(", ")}\n`;
@@ -209,16 +261,16 @@ async function main() {
 
   const analyzed = [];
 
-for (const pr of enriched) {
-  const analysis = analyzePr(pr);
-  const aiSummary = await getClaudeSummary(pr);
+  for (const pr of enriched) {
+    const analysis = analyzePr(pr);
+    const aiSummary = await getClaudeSummary(pr);
 
-  analyzed.push({
-    ...pr,
-    analysis,
-    aiSummary
-  });
-}
+    analyzed.push({
+      ...pr,
+      analysis,
+      aiSummary
+    });
+  }
 
   const markdown = buildMarkdown(analyzed);
 
@@ -230,51 +282,3 @@ main().catch((error) => {
   console.error(error);
   process.exit(1);
 });
-
-async function getClaudeSummary(pr) {
-  if (!CLAUDE_API_KEY) return null;
-
-  const prompt = `
-You are a senior Android engineer.
-
-Analyze this pull request:
-
-Title: ${pr.title}
-
-Files:
-${pr.files.map(f => f.filename).join("\n")}
-
-Commit messages:
-${pr.commitMessages.join("\n")}
-
-Explain briefly:
-1. What this PR does
-2. Potential risks
-3. What QA should test
-
-Keep it short and practical.
-`;
-
-  const response = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "x-api-key": CLAUDE_API_KEY,
-      "anthropic-version": "2023-06-01",
-      "content-type": "application/json"
-    },
-    body: JSON.stringify({
-      model: "claude-haiku-4-5-20251001",
-      max_tokens: 300,
-      messages: [
-        {
-          role: "user",
-          content: prompt
-        }
-      ]
-    })
-  });
-
-  const data = await response.json();
-
-  return data?.content?.[0]?.text || null;
-}
