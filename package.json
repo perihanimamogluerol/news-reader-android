@@ -1,0 +1,8 @@
+{
+  "name": "daily-pr-summary",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "daily-pr-summary": "node scripts/pr-summary-no-ai.js"
+  }
+}
