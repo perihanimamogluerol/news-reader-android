@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
 
+const CLAUDE_API_KEY = process.env.CLAUDE_API_KEY;
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const REPO = process.env.REPO;
 
@@ -170,6 +171,10 @@ function buildMarkdown(prs) {
     md += `- Build config change: ${pr.analysis.hasBuildChange ? "Yes" : "No"}\n`;
     md += `- Navigation change: ${pr.analysis.hasNavigationChange ? "Yes" : "No"}\n`;
 
+    if (pr.aiSummary) {
+  md += `\n🤖 AI Summary:\n${pr.aiSummary}\n`;
+}
+
     if (pr.labels.length > 0) {
       md += `- Labels: ${pr.labels.join(", ")}\n`;
     }
@@ -202,10 +207,18 @@ async function main() {
   const prs = await getRecentlyMergedPrs();
   const enriched = await Promise.all(prs.map(enrichPr));
 
-  const analyzed = enriched.map((pr) => ({
+  const analyzed = [];
+
+for (const pr of enriched) {
+  const analysis = analyzePr(pr);
+  const aiSummary = await getClaudeSummary(pr);
+
+  analyzed.push({
     ...pr,
-    analysis: analyzePr(pr)
-  }));
+    analysis,
+    aiSummary
+  });
+}
 
   const markdown = buildMarkdown(analyzed);
 
@@ -217,3 +230,51 @@ main().catch((error) => {
   console.error(error);
   process.exit(1);
 });
+
+async function getClaudeSummary(pr) {
+  if (!CLAUDE_API_KEY) return null;
+
+  const prompt = `
+You are a senior Android engineer.
+
+Analyze this pull request:
+
+Title: ${pr.title}
+
+Files:
+${pr.files.map(f => f.filename).join("\n")}
+
+Commit messages:
+${pr.commitMessages.join("\n")}
+
+Explain briefly:
+1. What this PR does
+2. Potential risks
+3. What QA should test
+
+Keep it short and practical.
+`;
+
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "x-api-key": CLAUDE_API_KEY,
+      "anthropic-version": "2023-06-01",
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 300,
+      messages: [
+        {
+          role: "user",
+          content: prompt
+        }
+      ]
+    })
+  });
+
+  const data = await response.json();
+
+  return data?.content?.[0]?.text || null;
+}
