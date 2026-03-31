@@ -28,6 +28,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
+          CLAUDE_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
         run: npm run daily-pr-summary
       - name: Send email
         uses: dawidd6/action-send-mail@v3
